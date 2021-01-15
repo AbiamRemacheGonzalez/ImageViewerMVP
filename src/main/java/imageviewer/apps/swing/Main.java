@@ -1,8 +1,6 @@
 package imageviewer.apps.swing;
 
-import imageviewer.control.Command;
-import imageviewer.control.NextImageCommand;
-import imageviewer.control.PrevImageCommand;
+import imageviewer.control.ImagePresenter;
 import imageviewer.model.Image;
 import imageviewer.view.ImageDisplay;
 import java.awt.BorderLayout;
@@ -24,7 +22,7 @@ public class Main extends JFrame{
         new Main().execute();
     }
     private ImageDisplay imagedisplay;
-    private Map<String,Command> commands = new HashMap<>();
+    private final ImagePresenter imagePresenter;
     
     public Main(){
         this.setTitle("Image Viewer");
@@ -32,11 +30,7 @@ public class Main extends JFrame{
         this.setLocationRelativeTo(null);
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         this.getContentPane().add(imagePanel());
-        this.add(toolbar(),BorderLayout.SOUTH);
-        List<Image> images = new FileImageLoader(new File("fotos")).load();
-        this.imagedisplay.display(images.get(0));
-        this.commands.put("Prev", new PrevImageCommand(images, imagedisplay));
-        this.commands.put("Next", new NextImageCommand(images, imagedisplay));
+        this.imagePresenter = createImagePresenter();
     }
     private void execute() {
         this.setVisible(true);
@@ -48,23 +42,11 @@ public class Main extends JFrame{
         return panel;
     }
 
-    private JMenuBar toolbar() {
-        JMenuBar toolbar = new JMenuBar();
-        toolbar.setLayout(new FlowLayout(FlowLayout.CENTER));
-        toolbar.add(button("Prev"));
-        toolbar.add(button("Next"));
-        return toolbar;
+    private ImagePresenter createImagePresenter() {
+        return new ImagePresenter(loadImages(), imagedisplay);
     }
 
-    private JButton button(String name) {
-        JButton button = new JButton(name);
-
-        button.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                commands.get(name).execute();
-            }
-        });
-        return button;
+    private List<Image> loadImages() {
+        return new FileImageLoader(new File("fotos")).load();
     }
 }
